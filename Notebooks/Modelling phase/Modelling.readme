@@ -1,0 +1,53 @@
+# Alternative Credit Scoring: Modelling Phase
+
+This README covers the **Modelling Phase** of the Alternative Credit Scoring project, as detailed in the `Modelling.ipynb` notebook. It highlights the transition from raw survey data to a validated predictive engine.
+
+## Project Overview
+This phase focuses on developing a predictive scoring engine to identify financial risk profiles using non-traditional data. By leveraging behavioral and demographic indicators, the project aims to enhance **financial inclusion** for populations lacking formal credit histories.
+
+## Data Description
+The models are trained on the **2021 FinAccess Household Survey (KNBS)**. The features used include:
+
+- **Demographics:** Age, gender, and education level  
+- **Economic Indicators:** Income groups and asset ownership  
+- **Behavioral Data:** Usage patterns of mobile money, traditional banking, and informal financial groups (Chamas)  
+
+## Technical Workflow
+
+### 1. Data Preprocessing
+- **Target Definition:** The model predicts `is_high_risk_target`  
+- **Splitting:** Data was split into 80% training and 20% testing sets, using stratification to maintain class balance  
+- **Scaling:** `StandardScaler` was applied to ensure features are on a comparable scale, which is particularly critical for Logistic Regression weights  
+
+### 2. Model Selection & Evaluation
+Three distinct algorithms were compared to establish a robust baseline. Performance was primarily measured using the **ROC-AUC score**.
+
+| Model                | Purpose            | Note                                                                 |
+|---------------------|-----------------|----------------------------------------------------------------------|
+| Logistic Regression  | Baseline         | Used with `class_weight='balanced'` to handle risk distribution      |
+| Random Forest        | Nonlinear capture | The "heavy lifter" used to capture complex interactions              |
+| XGBoost              | Optimization     | Gradient boosting model tuned specifically for the ~35% high-risk minority |
+
+### 3. Hyperparameter Tuning
+The XGBoost model underwent optimization via **RandomizedSearchCV**, exploring parameters such as `learning_rate`, `max_depth`, and `subsample` across **5-fold cross-validation**.
+
+## Key Insights & Feature Importance
+Feature importance was evaluated across all three models to identify what truly drives financial risk:
+
+- **Logistic Regression:** Analyzed via absolute coefficients  
+- **Random Forest:** Evaluated using Gini importance  
+- **XGBoost:** Evaluated using Gain scores  
+
+## Deployment Artifacts
+To facilitate future predictions on new data, the following components were serialized using `joblib`:
+
+- `logistic_regression_model.joblib`  
+- `random_forest_model.joblib`  
+- `xgb_credit_model.joblib`  
+- `scaler.joblib` (Required for preprocessing new inputs)  
+
+## Future Reflections
+The current performance plateau (**ROC-AUC ~0.6681**) suggests that further gains will come from **Feature Engineering** rather than model tuning. Proposed next steps include:
+
+- **Interaction Terms:** Combining Age and Mobile Banking usage  
+- **Wealth Index:** Synthesizing income, assets, and education into a single stability metric
