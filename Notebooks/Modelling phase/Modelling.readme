@@ -28,6 +28,100 @@ Three distinct algorithms were compared to establish a robust baseline. Performa
 | Random Forest        | Nonlinear capture | The "heavy lifter" used to capture complex interactions              |
 | XGBoost              | Optimization     | Gradient boosting model tuned specifically for the ~35% high-risk minority |
 
+## Feature Importance Analysis
+
+To understand the drivers of default risk, feature importance was evaluated across three models:
+
+- Logistic Regression (absolute standardized coefficients)
+- Random Forest (Gini importance)
+- XGBoost (Gain importance)
+
+### Logistic Regression (Coefficient Magnitude)
+
+Top features:
+- mobile_bank_usage_3.0  
+- education_3.0  
+- savings_usage_3.0  
+- income group (incomegnew_6.0)  
+- infp_usage_3.0  
+
+**Insight:**  
+Digital financial engagement (mobile banking and savings usage) strongly influences predicted default probability. Education and income segmentation also play a significant role. Logistic regression provides directional interpretability, making it suitable for regulated credit environments.
+
+---
+
+### Random Forest (Gini Importance)
+Gini (Gini Impurity) is a metric used in decision trees (Random Forest included) to measure how “pure” a node is.
+
+Top features:
+- A19  
+- B3I_log  
+- mobile_bank_usage_3.0  
+- savings_usage_3.0  
+- education variables  
+
+**Insight:**  
+Tree-based splits emphasize behavioral and transformed financial variables. The prominence of A19 and B3I_log suggests nonlinear interactions that are not fully captured by linear models.
+
+---
+
+### XGBoost (Gain Importance)
+
+Top features:
+- savings_usage_3.0  
+- mobile_bank_usage_3.0  
+- infp_usage_3.0  
+- incomegnew_6.0  
+- education variables  
+
+**Insight:**  
+Boosting confirms that transactional and savings behavior are the strongest predictive drivers. Income and education remain consistently relevant across models, reinforcing their structural importance in credit risk segmentation.
+
+---
+
+### Cross-Model Observation
+
+Across all three models, digital financial behavior variables consistently rank among the top predictors. This supports the hypothesis that alternative behavioral data can meaningfully enhance credit risk assessment, particularly in thin-file populations.
+
+## Model Evaluation: Tuned XGBoost
+
+### Confusion Matrix
+
+|                | Predicted Low Risk | Predicted High Risk |
+|----------------|-------------------|---------------------|
+| **Actual Low Risk**  | 1459 | 1054 |
+| **Actual High Risk** | 448  | 935  |
+
+### Classification Report
+
+| Class | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0 (Low Risk)  | 0.77 | 0.58 | 0.66 | 2513 |
+| 1 (High Risk) | 0.47 | 0.68 | 0.55 | 1383 |
+
+**Overall Accuracy:** 0.61  
+**Macro Avg F1:** 0.61  
+**Weighted Avg F1:** 0.62  
+
+---
+
+### Key Insights
+
+- The model identifies **68% of high-risk borrowers** (strong recall for default detection).
+- However, precision for high-risk classification is moderate (47%), indicating some false positives.
+- The model is more precise when predicting low-risk borrowers (77% precision).
+- There is a trade-off: improving high-risk recall increases misclassification of low-risk customers.
+
+### Business Interpretation
+
+From a credit risk perspective:
+
+- Higher recall for high-risk borrowers reduces the probability of lending to defaulters.
+- False positives (low-risk predicted as high-risk) may reduce approval rates.
+- Threshold tuning could be applied to balance risk appetite vs. portfolio growth.
+
+Overall, the tuned XGBoost model demonstrates moderate discriminatory power with stronger performance in detecting risky borrowers than a naive classifier.
+
 ### 3. Hyperparameter Tuning
 The XGBoost model underwent optimization via **RandomizedSearchCV**, exploring parameters such as `learning_rate`, `max_depth`, and `subsample` across **5-fold cross-validation**.
 
