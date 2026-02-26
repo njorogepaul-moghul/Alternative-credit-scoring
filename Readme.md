@@ -1,4 +1,5 @@
 # Alternative Credit Scoring System
+***[😊 TRY Alternative Credit Scoring app here:](https://alternativecreditscoring-app-gojkhneajqbfpnshgxsyv3.streamlit.app/)***
 
 **A Predictive Model for Household Loan Default Risk using the 2021 FinAccess Survey**  
 **Author:** Paulo – Level 300 Applied Math & CS, Kenyatta University
