@@ -1,94 +1,104 @@
-# Alternative Credit Scoring System  
-**Phase 1: Data Cleaning & Feature Engineering**
+# 🧹 Phase 1: Data Cleaning & Feature Engineering
+### Alternative Credit Scoring System — FinAccess 2021 Survey (KNBS)
 
-This README covers the initial phase of the **Alternative Credit Scoring System**, focusing on the rigorous data cleaning and feature engineering required to transform the **2021 FinAccess Household Survey** into a machine-learning-ready dataset.
-
----
-
-## 📋 Table of Contents
-- Project Overview  
-- Target Variable Construction  
-- Feature Selection Strategy  
-- Data Cleaning Pipeline  
-- Final Dataset Specifications  
+> This notebook transforms a 22,024-row national survey into a machine-learning-ready feature matrix. It is the foundation of the entire project — poor cleaning here cascades into model bias and unreliable predictions downstream.
 
 ---
 
-## 🔍 Project Overview
-Traditional lending often excludes *thin-file* individuals who lack formal bank credit history. This phase focuses on defining a robust **Ground Truth** for financial distress and preparing high-signal predictors—including mobile money usage (*M-Shwari, Fuliza*) and informal social finance (*Chamas*)—for classification modeling.
+## 📌 Why This Phase Matters
 
-This repository contains the first phase of a predictive modeling project designed to assess **household loan default risk in Kenya**, using the **2021 FinAccess Household Survey** conducted by **KNBS** and **CBK**.
+The raw FinAccess 2021 dataset contains **22,024 rows and 2,353 columns** — a survey designed for policy research, not machine learning. Before any model can be trained, the data must be surgically reduced, cleaned, and restructured into a feature matrix that a classifier can actually use.
+
+This phase also defines what "credit risk" means in the Kenyan informal economy — a non-trivial problem when most respondents have no formal credit history at all.
 
 ---
 
-## 🎯 Target Variable Construction: The *High Risk* Label
-A composite target variable, **`is_high_risk`**, was engineered to capture the nuances of credit failure in the Kenyan market.
+## 🎯 The Business Context: Why Alternative Data?
 
-An individual is classified as **High Risk (1)** if they meet **at least one** of the following criteria:
+Traditional credit scoring excludes **"thin-file"** individuals — those without formal bank statements or payslip history. In Kenya, this describes a large portion of the working population: informal traders, casual workers, Chama members, and mobile-money-only users.
 
-- **`defaulted`**: Hard default on loans or debt  
-- **`paidlate`**: Recorded arrears or late payments  
-- **`E2Ci23`**: Safety-net indicator capturing missed payments or general delinquency  
+This phase identifies and engineers **behavioral and demographic features** that serve as credible proxies for creditworthiness in the absence of traditional credit history.
+
+---
+
+## 🎯 Target Variable Construction: `is_high_risk`
+
+A composite binary target was engineered to reflect the reality of credit failure in Kenya's informal economy.
+
+An individual is labelled **High Risk (1)** if they meet **at least one** of the following:
+
+| Condition | Description |
+|---|---|
+| `defaulted` | Hard default on any loan or debt obligation |
+| `paidlate` | Recorded arrears or late payments |
+| `E2Ci23` | Safety-net indicator — missed payments or general delinquency |
 
 ### Class Distribution
 
-| Class | Label     | Count  | Percentage |
-|------:|-----------|--------:|-----------:|
-| 0     | Low Risk  | 14,613  | 66.35%     |
-| 1     | High Risk | 7,411   | 33.65%     |
+| Class | Label | Count | Share |
+|---|---|---|---|
+| 0 | Low Risk | 14,613 | 66.35% |
+| 1 | High Risk | 7,411 | 33.65% |
 
-**Insight:**  
-The ~34% risk rate reflects the breadth of Kenya’s informal and digital credit markets, yielding a balanced dataset suitable for supervised learning.
-
----
-
-## 🛠 Feature Selection Strategy
-To predict risk without traditional credit scores, features were selected across four strategic dimensions:
-
-- **Demographics**  
-  - Age (`A19`)  
-  - Education level  
-  *Proxies for earning capacity and long-term stability.*
-
-- **Economic Indicators**  
-  - Monthly income (`B3I`)  
-  - Income sources (formal employment vs. casual work)  
-  *Signals of cash-flow consistency.*
-
-- **Digital Behavior**  
-  - Mobile money and mobile banking usage  
-  *Key alternative data signals for financial behavior.*
-
-- **Social Resilience**  
-  - Informal group participation (`infgp_usage`)  
-  *Measures access to social safety nets.*
+> The ~34% high-risk rate reflects the breadth of Kenya's informal and digital credit markets — yielding sufficient minority class signal for supervised learning without extreme imbalance.
 
 ---
 
 ## ⚙️ Data Cleaning Pipeline
-The raw survey data (**22,024 rows, 2,353 columns**) underwent the following steps:
 
-### 1. Deduplication
-- **Action:** Removed **2,548** duplicate rows  
-- **Rationale:** Prevents overfitting by ensuring the model does not memorize identical observations  
+### Step 1 — Deduplication
+- **Action:** Removed **2,548 duplicate rows** from the raw 22,024-row dataset
+- **Rationale:** Duplicates in survey data introduce artificial class patterns that inflate model confidence on training data while hurting generalisation on unseen data
 
-### 2. Missing Value Imputation
-- **Action:** Imputed **1,843** missing values in monthly income (`B3I`) using the **median**  
-- **Rationale:** Retains informal-sector respondents and avoids bias introduced by listwise deletion  
+### Step 2 — Missing Value Imputation
+- **Action:** Imputed **1,843 missing values** in the monthly income field (`B3I`) using the column **median**
+- **Rationale:** Listwise deletion was rejected — it would disproportionately remove informal-sector respondents, the very population this model is designed to score
 
-### 3. Categorical Encoding
-- **Action:** Applied **One-Hot Encoding** to categorical variables such as gender, education, and mobile money usage  
-- **Rationale:** Avoids imposing false ordinal relationships on nominal categories  
+### Step 3 — Categorical Encoding
+- **Action:** Applied **One-Hot Encoding** to nominal variables: gender, education level, mobile money usage frequency, mobile banking frequency, Chama participation, and savings behaviour
+- **Rationale:** Ordinal encoding was deliberately avoided to prevent imposing false ranking assumptions on categorical survey responses
+
+---
+
+## 🔍 Feature Selection Strategy
+
+26 predictor variables retained across four strategic dimensions:
+
+| Dimension | Features | Rationale |
+|---|---|---|
+| Demographics | Age (`A19`), Education Level | Proxy for earning capacity and long-term stability |
+| Economic | Monthly Income (`B3I`), Income Group, Employment vs Casual Work | Cash-flow consistency signals |
+| Digital Behavior | Mobile Money & Banking frequency | High-quality alternative credit signal |
+| Social Resilience | Chama / Informal Group participation | Measures access to social safety nets |
 
 ---
 
 ## 📊 Final Dataset Specifications
-The output of Phase 1 is a consolidated dataset: **`encoded_data.csv`**.
 
-- **Final Observations:** 19,476 individuals  
-- **Feature Space:** 26 predictor variables (post one-hot encoding)  
-- **Target Variable:** 1 binary vector (`is_high_risk_target`)  
+| Property | Value |
+|---|---|
+| Output File | `encoded_data.csv` |
+| Rows (Clean) | 19,476 individuals |
+| Feature Columns | 26 predictor variables |
+| Target Column | `is_high_risk_target` (binary) |
+| Class Balance | 66.35% Low Risk / 33.65% High Risk |
 
 ---
 
-*End of Phase 1 Documentation*
+## 🛠️ Tech Stack
+
+```
+Python · Pandas · NumPy · Scikit-Learn
+```
+
+---
+
+## 📁 Notebook
+
+```
+Data_cleaning_phase.ipynb
+```
+
+---
+
+> **Next → [Phase 2: Exploratory Data Analysis](../Exploratory_Data_Analysis_phase.ipynb)**
