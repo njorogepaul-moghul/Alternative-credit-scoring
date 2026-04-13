@@ -1,39 +1,118 @@
-# Phase 2: Exploratory Data Analysis (EDA)
+# 📊 Phase 2: Exploratory Data Analysis
+### Alternative Credit Scoring System — From Raw Survey to Actionable Insights
 
-## 1. Overview
-This phase transitions the **"Alternative Credit Scoring System"** from raw data to actionable insights. By analyzing the **FinAccess 2021 dataset**, we examine the socioeconomic and digital behaviors that distinguish **"High Risk"** from **"Low Risk"** individuals in Kenya's informal economy.
+> This phase transitions the project from a cleaned dataset to a validated analytical foundation. The goal is not just to understand the data — it is to confirm or reject the core hypothesis: that behavioral and digital signals can predict credit risk without formal credit history.
 
-## 2. Objectives
-- **Feature Engineering & Transformation:** Address extreme skewness in financial variables to ensure model stability.  
-- **Risk Profiling:** Identify the primary drivers of credit risk across demographic, financial, and digital dimensions.  
-- **Data Integrity:** Perform a final audit of outliers (e.g., age and income) to prevent biased model weights.  
+---
 
-## 3. Key Findings & Insights
+## 📌 Objectives
 
-### 3.1 Financial Behavior & Distribution
-- **The Income Skew:** Monthly income exhibited an extreme positive skew (7.55). We applied a Natural Log Transformation (`log(1+x)`) to normalize the variance, ensuring the model treats percentage changes in income consistently.  
-- **Capacity vs. Risk:** While higher income correlates with lower risk, significant overlap exists in the middle-income brackets, justifying the need for non-traditional "Alternative" data.  
+- **Hypothesis Testing:** Validate that mobile money usage, Chama participation, and education level are credible credit risk signals
+- **Feature Transformation:** Address extreme skewness in financial variables to ensure model stability
+- **Risk Profiling:** Identify the primary drivers of credit risk across demographic, financial, and digital dimensions
+- **Data Integrity:** Final audit of outliers (age and income) to prevent biased model weights
 
-### 3.2 The Digital Signal (Alternative Data)
-- **Mobile Money & Banking:** Frequent usage (Daily/Weekly) is a high-quality proxy for financial inclusion. High transactional velocity correlates strongly with Low Risk status.  
-- **Social Capital:** Participation in informal groups (Chamas) serves as "Social Collateral." Frequent contributors demonstrate higher financial discipline and lower default rates.  
+---
 
-### 3.3 Demographic Stability
-- **Age Factor:** Credit risk peaks in the 20–35 age bracket and stabilizes with maturity. We capped age outliers to maintain focus on the statistically significant active labor force.  
-- **Education Anchor:** Higher educational attainment is the strongest demographic predictor of credit stability, acting as a "stability anchor" for individuals without formal bank statements.  
+## 🔑 Key Findings
 
-## 4. Visual Analysis Summary
-The following charts were analyzed to validate our economic hypotheses:  
-- **Income Distributions:** Original vs. Log-Transformed  
-- **Risk Distributions:** Segmented by Age, Gender, and Education  
-- **Digital Footprint:** Risk rates by Mobile Money and Mobile Banking frequency  
-- **Social Connectivity:** Risk rates by Informal Group (Chama) involvement  
-- **Correlation Heatmap:** Identifying the strongest linear drivers of credit distress  
+### 1. The Income Skew Problem
+Monthly income (`B3I`) exhibited an **extreme positive skew of 7.55** — typical of informal-economy income distributions where a small number of high earners distort the mean significantly.
 
-## 5. Technical Implementation
-- **Libraries:** Pandas, Matplotlib, Seaborn, Numpy  
-- **Transformations:** Natural Log scaling for Income; Outlier capping for Age  
-- **Target Balance:** The dataset contains a ~35% "High Risk" class, providing a robust signal for supervised learning  
+**Fix applied:** Natural Log Transformation `log(1+x)` to normalise variance.
 
-## 6. Conclusion
-The EDA confirms that creditworthiness in the informal sector is multi-dimensional. Income alone is insufficient; however, by combining **Income** with **Digital Footprint** and **Social Capital**, we have a viable path to score the "unbanked" population.
+> Without this transformation, the model would systematically over-weight high-income outliers and fail to learn meaningful patterns from the majority of respondents.
+
+---
+
+### 2. The Digital Signal — Mobile Money as Credit Proxy
+Daily and weekly mobile money users showed **materially lower default rates** compared to infrequent or non-users. This validates the core alternative data hypothesis: transactional velocity on **M-Shwari and Fuliza** is a genuine proxy for financial discipline.
+
+> Mobile banking frequency emerged as the **single strongest predictor** across all three models tested in Phase 3 — confirming EDA intuition before modelling began.
+
+---
+
+### 3. Social Capital — Chamas as Financial Discipline Signals
+Frequent **Chama** (informal savings group) participants demonstrated consistently lower financial risk. Chama membership signals:
+- Regular savings discipline
+- Peer accountability structures
+- Access to informal credit safety nets
+
+> This is a uniquely Kenyan alternative data signal with broad applicability across East African markets.
+
+---
+
+### 4. The Age-Risk Profile
+Credit risk **peaks in the 20–35 age bracket** and stabilises with maturity. Age outliers were capped to maintain focus on the statistically significant active labour force.
+
+> This nonlinear age-risk relationship is better captured by tree-based models (Random Forest, XGBoost) than by Logistic Regression.
+
+---
+
+### 5. Education as a Stability Anchor
+Higher educational attainment was the **strongest demographic predictor of credit stability**. Individuals with secondary or tertiary education showed significantly lower default rates even when controlling for income level.
+
+---
+
+## ✅ Hypotheses Tested
+
+| Hypothesis | Result | Confidence |
+|---|---|---|
+| Digital mobile usage predicts lower credit risk | ✅ Confirmed | High |
+| Chama participation signals financial discipline | ✅ Confirmed | High |
+| Higher income = lower risk (linear relationship) | ⚠️ Partial | Medium — significant overlap in middle-income brackets |
+| Education stabilises repayment behaviour | ✅ Confirmed | High |
+| Age has a nonlinear risk profile | ✅ Confirmed | High |
+
+---
+
+## 📈 Visualisations Produced
+
+| Chart | Purpose |
+|---|---|
+| Income Distribution (original vs log-transformed) | Skew correction validation |
+| Risk Distribution by Age | Confirming the 20–35 peak |
+| Risk Rates by Gender and Education | Demographic segmentation |
+| Default Rate by Mobile Money Frequency | Digital signal validation |
+| Default Rate by Mobile Banking Frequency | Alternative data hypothesis |
+| Chama Participation vs Financial Risk Rate | Social capital signal |
+| Correlation Heatmap | Linear drivers of credit distress |
+
+---
+
+## 🛠️ Technical Implementation
+
+| Component | Detail |
+|---|---|
+| Libraries | Pandas, Matplotlib, Seaborn, NumPy |
+| Income Transformation | `log(1+x)` — Natural Log applied to `B3I` |
+| Age Handling | Outlier capping at statistically significant bounds |
+| Class Balance | 64.51% Low Risk / 35.49% High Risk |
+| Notebook | `Exploratory_Data_Analysis_phase.ipynb` |
+
+---
+
+## 💡 Conclusion
+
+The EDA confirms that creditworthiness in Kenya's informal economy is **multi-dimensional**. Income alone is an unreliable predictor — the signal is too noisy without transformation and the relationship is nonlinear.
+
+The combination of:
+- **Digital footprint** (mobile money & banking frequency)
+- **Social capital** (Chama participation)
+- **Demographic stability** (education, age)
+
+...provides a viable and ethically grounded path to scoring the unbanked population.
+
+> These findings directly informed the feature selection and model architecture decisions in Phase 3.
+
+---
+
+## 📁 Notebook
+
+```
+Exploratory_Data_Analysis_phase.ipynb
+```
+
+---
+
+> **← [Phase 1: Data Cleaning](../Data_cleaning_phase.ipynb)** &nbsp;|&nbsp; **[Phase 3: Modelling →](../Modelling.ipynb)**
